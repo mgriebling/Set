@@ -130,7 +130,7 @@ struct SetGame<SetType:Chooseable> {
         let states : [SetType]  // we store one array element for each card attribute
         
         private func match(_ a: SetType, _ b: SetType, _ c: SetType) -> Bool {
-            (a == b && b == c) || (a != b && b != c)
+            (a == b && b == c && a == c) || (a != b && b != c && a != c)
         }
         
         /// Check if the indexed cards match.
@@ -141,11 +141,7 @@ struct SetGame<SetType:Chooseable> {
         ///  - They all have the same shading or have three different shadings.
         ///  - They all have the same color or have three different colors.
         func match(a: Shapes, b: Shapes) -> Bool {
-//            var didMatch = true
             let didMatch = states.indices.reduce(true) { $0 && match(a.states[$1], b.states[$1], states[$1]) }
-//            for symbol in states.indices {
-//                didMatch = didMatch && match(a.states[symbol], b.states[symbol], self.states[symbol])
-//            }
             return didMatch
         }
     }
