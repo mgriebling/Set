@@ -24,13 +24,13 @@ struct SetGame<SetType:Chooseable> {
         let contents = indices.map { cards[$0].content }
         let match = contents[0].match(a: contents[1], b: contents[2])
         for index in indices {
-            cards[index].isMatched = match
+            if match {
+                cards[index].isMatched = true
+            } else {
+                cards[index].failedMatch = true
+            }
         }
         return match
-    }
-    
-    private mutating func removeCards(_ indices: [Int]) {
-        cards.remove(atOffsets: IndexSet(indices))
     }
     
     private mutating func replaceCards(_ indices: [Int]) {
@@ -46,6 +46,7 @@ struct SetGame<SetType:Chooseable> {
     private mutating func deselectCards(_ indices: [Int]) {
         for index in indices {
             cards[index].isSelected = false
+            cards[index].failedMatch = false
         }
     }
     
@@ -55,8 +56,7 @@ struct SetGame<SetType:Chooseable> {
         if matchCards(selectedIDs) {
             if !selectedIDs.contains(chosenIndex) {
                 cards[chosenIndex].isSelected = true
-                removeCards(selectedIDs)
-                dealCards(number: numberOfCardsToSelect)
+                replaceCards(selectedIDs)
             }
         } else {
             deselectCards(selectedIDs)
@@ -122,6 +122,7 @@ struct SetGame<SetType:Chooseable> {
     struct Card : Identifiable {
         var isSelected = false
         var isMatched = false
+        var failedMatch = false
         let content : Shapes
         let id: Int // Identifiable compliance
     }

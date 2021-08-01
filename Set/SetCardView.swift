@@ -18,7 +18,9 @@ struct SetCardView: View {
             let colourOfSymbols = card.content.colourOfSymbols
             let shapeOfSymbols = card.content.shapeOfSymbols
             ZStack {
-                cardShape.fill().foregroundColor(card.isMatched ? .yellow.opacity(DrawingConstants.opacity) : DrawingConstants.cardColour)
+                let matchColor = card.failedMatch ? Color.red.opacity(DrawingConstants.opacity) : DrawingConstants.cardColour
+                let color = card.isMatched ? .yellow.opacity(DrawingConstants.opacity) : matchColor
+                cardShape.fill().foregroundColor(color)
                 cardShape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
                 VStack {
                     ForEach([Int](1...noOfSymbols), id: \.self) { _ in
@@ -48,8 +50,7 @@ struct SetCardView: View {
         static let cardColour = Color.white
         static let cornerRadius = CGFloat(10)
         static let lineWidth = CGFloat(3)
-        static let fontScale = CGFloat(0.8)
-        static let opacity = 0.5
+        static let opacity = 0.8
     }
 }
 
