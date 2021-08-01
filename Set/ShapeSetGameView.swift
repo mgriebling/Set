@@ -13,19 +13,26 @@ struct ShapeSetGameView: View {
     var body: some View {
         VStack {
             Text(game.title).font(.title)
-            AspectVGrid(items: game.cards, aspectRatio: 2/3) { card in
+            AspectVGrid(items: game.cards, aspectRatio: mainSettings.aspectRatio) { card in
                 SetCardView(card: card,
-                            backColor: card.isSelected ? .blue : .gray.opacity(0.6))
+                            backColor: card.isSelected ? mainSettings.highlightColour : mainSettings.outlineColour)
                     .onTapGesture { game.choose(card) }
             }
             HStack {
                 Spacer()
                 Button("New Game") { game.newGame() }
                 Spacer()
-                Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? 0.3 : 1.0)
+                Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
                 Spacer()
             }
         }
+    }
+    
+    private struct mainSettings {
+        static let highlightColour = Color.blue
+        static let outlineColour = Color.gray.opacity(0.6)
+        static let ghostedOpacity = 0.3
+        static let aspectRatio = CGFloat(2.0/3.0)
     }
 }
 
