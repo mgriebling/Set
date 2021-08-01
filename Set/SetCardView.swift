@@ -19,7 +19,7 @@ struct SetCardView: View {
             let shapeOfSymbols = card.content.shapeOfSymbols
             ZStack {
                 let matchColor = card.failedMatch ? Color.red.opacity(DrawingConstants.opacity) : DrawingConstants.cardColour
-                let color = card.isMatched ? .yellow.opacity(DrawingConstants.opacity) : matchColor
+                let color = card.isMatched ? .yellow : matchColor
                 cardShape.fill().foregroundColor(color)
                 cardShape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
                 VStack {
