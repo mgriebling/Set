@@ -37,7 +37,7 @@ extension Shape {
     func stripes(angle: Double = 0, colour: Color = .black) -> AnyView {
         let stripeColor = UIColor(colour)
         guard
-            let stripePattern = CGImage.generateStripePattern(colors: (.clear, stripeColor))
+            let stripePattern = CGImage.generateStripePattern(colors: (.white, stripeColor))
         else { return AnyView(self)}
 
         return AnyView(Rectangle().fill(ImagePaint(

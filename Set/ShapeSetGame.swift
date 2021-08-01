@@ -7,85 +7,70 @@
 
 import SwiftUI
 
-enum Triple : Equatable, CustomStringConvertible, CaseIterable {
+enum Triple : Chooseable {
     case one, two, three
-    
-    var description: String {
-        switch self {
-        case .one: return "one"
-        case .two: return "two"
-        case .three: return "three"
-        }
-    }
 }
 
-struct Shapes : Equatable {
-    let colour : Triple
-    let shape : Triple
-    let fill : Triple
-    let number : Triple
-    
-    var numberOfSymbols : Int { ShapeSetGame.theme.number[self.number]! }
-    var colourOfSymbols : Color { ShapeSetGame.theme.colours[self.colour]! }
-    var shapeOfSymbols  : ShapeSetGame.Shape { ShapeSetGame.theme.shapes[self.shape]! }
-    var fillOfSymbols   : ShapeSetGame.Fill { ShapeSetGame.theme.fills[self.fill]! }
+extension SetGame.Shapes {
+    var numberOfSymbols : Int                 { ShapeSetGame.theme.number[self.states[0] as! Triple]! }
+    var colourOfSymbols : Color               { ShapeSetGame.theme.colours[self.states[1]  as! Triple]! }
+    var shapeOfSymbols  : ShapeSetGame.Shapes { ShapeSetGame.theme.shapes[self.states[2]  as! Triple]! }
+    var fillOfSymbols   : ShapeSetGame.Fills  { ShapeSetGame.theme.fills[self.states[3]  as! Triple]! }
 }
 
 class ShapeSetGame: ObservableObject {
-    
-    public typealias SetGameShapes = SetGame<Shapes>
-    
-    enum Fill { case none, solid, hatched }
-    enum Shape { case capsule, diamond, sqiggle }
+
+    enum Fills { case none, solid, hatched }
+    enum Shapes { case capsule, diamond, sqiggle }
     
     static let theme =
         Theme(name: "Traditional",
-              colours: [.one: .red,     .two: .green,   .three: .purple],
+              colours: [.one: .orange,  .two: .green,   .three: .purple],
               shapes:  [.one: .capsule, .two: .diamond, .three: .sqiggle],
               fills:   [.one: .none,    .two: .solid,   .three: .hatched],
               number:  [.one: 1,        .two: 2,        .three: 3])
     
-    @Published private var game = createSetGame()
+//    static let cardsToStart = 12
     
-    var cards : [SetGameShapes.Card] { game.cards }
+    @Published private var game = SetGame<Triple>()
     
-    static private func createSetGame() -> SetGameShapes {
-        SetGameShapes { colour, shape, fill, number in
-            Shapes(colour: colour, shape: shape, fill: fill, number: number)
-        }
-    }
+    var cards : [SetGame<Triple>.Card] { game.cards }
+    
+    var noMoreCards : Bool { game.noMoreCards }
+    
+    var title : String { ShapeSetGame.theme.name + " Set" }
     
     private static let capsule = RoundedRectangle(cornerRadius: Tweaks.radius)
     
-    @ViewBuilder static func strokedSymbol(shape: Shape, colour: Color) -> some View {
+    @ViewBuilder static func strokedSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
-        case .capsule: capsule.strokeBorder(colour, lineWidth: Tweaks.lineWidth).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .sqiggle: Squiggle().stroke(colour, lineWidth: Tweaks.lineWidth).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .diamond: Diamond().stroke(colour, lineWidth: Tweaks.lineWidth).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .capsule: capsule.strokeBorder(colour, lineWidth: Tweaks.lineWidth).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .sqiggle: Squiggle().stroke(colour, lineWidth: Tweaks.lineWidth).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .diamond: Diamond().stroke(colour, lineWidth: Tweaks.lineWidth).aspectRatio(Tweaks.aspect, contentMode: .fit)
         }
     }
     
-    @ViewBuilder static func filledSymbol(shape: Shape, colour: Color) -> some View {
+    @ViewBuilder static func filledSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
-        case .capsule: capsule.fill(colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .sqiggle: Squiggle().fill(colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .diamond: Diamond().fill(colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .capsule: capsule.fill(colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .sqiggle: Squiggle().fill(colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .diamond: Diamond().fill(colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
         }
     }
     
-    @ViewBuilder static func hatchedSymbol(shape: Shape, colour: Color) -> some View {
+    @ViewBuilder static func hatchedSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
-        case .capsule: capsule.stripes(colour: colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .sqiggle: Squiggle().stripes(colour: colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
-        case .diamond: Diamond().stripes(colour: colour).padding().aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .capsule: capsule.stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .sqiggle: Squiggle().stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        case .diamond: Diamond().stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
         }
     }
     
     struct Theme {
         let name: String
         let colours: [Triple:Color]
-        let shapes:  [Triple:Shape]
-        let fills:   [Triple:Fill]
+        let shapes:  [Triple:Shapes]
+        let fills:   [Triple:Fills]
         let number:  [Triple:Int]
     }
     
@@ -93,20 +78,16 @@ class ShapeSetGame: ObservableObject {
     struct Tweaks {
         static let lineWidth = CGFloat(3)
         static let radius = CGFloat(150)
-        static let aspect = CGFloat(3.0/2.0)
+        static let aspect = CGFloat(2.0/1.0)
     }
     
     
     // MARK: - Intents
     
-    func choose(_ card: SetGameShapes.Card) { game.choose(card) }
+    func choose(_ card: SetGame<Triple>.Card) { game.choose(card) }
     
-    func deal3() {
-        
-    }
+    func deal3() { game.dealCards(number: 3) }
     
-    func newGame() {
-        game = ShapeSetGame.createSetGame()
-    }
+    func newGame() { game = SetGame<Triple>() }
 }
 

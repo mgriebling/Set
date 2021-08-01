@@ -11,15 +11,20 @@ struct ShapeSetGameView: View {
     @ObservedObject var game: ShapeSetGame
     
     var body: some View {
-        ScrollView {
-            VStack {
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 80))]) {
-                    ForEach(game.cards) { card in
-                        SetCardView(card: card, backColor: Color.blue)
-                            .aspectRatio(2/3, contentMode: .fit)
-                    }
-                }
-            }.padding()
+        VStack {
+            Text(game.title).font(.title)
+            AspectVGrid(items: game.cards, aspectRatio: 2/3) { card in
+                SetCardView(card: card,
+                            backColor: card.isSelected ? .blue : .gray.opacity(0.6))
+                    .onTapGesture { game.choose(card) }
+            }
+            HStack {
+                Spacer()
+                Button("New Game") { game.newGame() }
+                Spacer()
+                Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? 0.3 : 1.0)
+                Spacer()
+            }
         }
     }
 }
