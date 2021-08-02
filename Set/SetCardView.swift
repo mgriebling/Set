@@ -14,24 +14,23 @@ struct SetCardView: View {
     var body: some View {
         VStack {
             let cardShape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-            let noOfSymbols = card.content.numberOfSymbols
-            let colourOfSymbols = card.content.colourOfSymbols
-            let shapeOfSymbols = card.content.shapeOfSymbols
+            let noOfSymbols = card.numberOfSymbols
+            let colourOfSymbols = card.colourOfSymbols
+            let shapeOfSymbols = card.shapeOfSymbols
             ZStack {
-                let matchColor = card.failedMatch ? Color.red.opacity(DrawingConstants.opacity) : DrawingConstants.cardColour
-                let color = card.isMatched ? .yellow : matchColor
+                let matchColor = card.isMatched ? .yellow : DrawingConstants.cardColour
+                let color = card.failedMatch ? Color.red : matchColor
                 cardShape.fill().foregroundColor(color)
-                cardShape.strokeBorder(lineWidth: DrawingConstants.lineWidth)
+                cardShape.strokeBorder(lineWidth: card.isSelected ? 2*DrawingConstants.lineWidth : DrawingConstants.lineWidth)
                 VStack {
                     ForEach([Int](1...noOfSymbols), id: \.self) { _ in
-                        switch card.content.fillOfSymbols {
+                        switch card.fillOfSymbols {
                         case .none:
                             ZStack {
                                 // fill with white first so the hightlight shows better
                                 ShapeSetGame.filledSymbol(shape: shapeOfSymbols, colour: DrawingConstants.cardColour)
                                 ShapeSetGame.strokedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
                             }
-
                         case .solid:
                             ShapeSetGame.filledSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
                         case .hatched:
@@ -54,9 +53,3 @@ struct SetCardView: View {
     }
 }
 
-//struct SetCardView_Previews: PreviewProvider {
-//    static var previews: some View {
-//        let card = SetGame<Shapes>.Card(content: Shapes(colour: .one, shape: .one, fill: .two, number: .three), id: 100)
-//        return SetCardView(card: card, backColor: Color.blue)
-//    }
-//}

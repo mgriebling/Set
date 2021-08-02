@@ -12,20 +12,27 @@ struct ShapeSetGameView: View {
     
     var body: some View {
         VStack {
-            Text(game.title).font(.title)
+            HStack {
+                Text(game.score).bold().opacity(0).padding(.horizontal)  // just center the title
+                Spacer()
+                Text(game.title)
+                Spacer()
+                Text(game.score).bold().padding(.horizontal)
+            }
             AspectVGrid(items: game.cards, aspectRatio: mainSettings.aspectRatio) { card in
                 SetCardView(card: card,
                             backColor: card.isSelected ? mainSettings.highlightColour : mainSettings.outlineColour)
                     .onTapGesture { game.choose(card) }
             }
             HStack {
-                Spacer()
                 Button("New Game") { game.newGame() }
                 Spacer()
                 Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
                 Spacer()
-            }
+                Button("Cheat") { game.cheat() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
+            }.padding(.horizontal)
         }
+        .font(.title)
     }
     
     private struct mainSettings {

@@ -11,7 +11,7 @@ enum Triple : Chooseable {
     case one, two, three
 }
 
-extension SetGame.Shapes {
+extension SetGame.Card {
     var numberOfSymbols : Int                 { ShapeSetGame.theme.number[self.states[0] as! Triple]! }
     var colourOfSymbols : Color               { ShapeSetGame.theme.colours[self.states[1]  as! Triple]! }
     var shapeOfSymbols  : ShapeSetGame.Shapes { ShapeSetGame.theme.shapes[self.states[2]  as! Triple]! }
@@ -30,15 +30,15 @@ class ShapeSetGame: ObservableObject {
               fills:   [.one: .none,    .two: .solid,   .three: .hatched],
               number:  [.one: 1,        .two: 2,        .three: 3])
     
-//    static let cardsToStart = 12
+    static let cardsToStart = 12
     
-    @Published private var game = SetGame<Triple>()
+    @Published private var game = SetGame<Triple>(cardsToStart: cardsToStart)
     
     var cards : [SetGame<Triple>.Card] { game.cards }
     
     var noMoreCards : Bool { game.noMoreCards }
-    
     var title : String { ShapeSetGame.theme.name + " Set" }
+    var score : String { " Score: \(game.score)" }
     
     private static let capsule = RoundedRectangle(cornerRadius: Tweaks.radius)
     
@@ -88,6 +88,8 @@ class ShapeSetGame: ObservableObject {
     
     func deal3() { game.dealCards(number: 3) }
     
-    func newGame() { game = SetGame<Triple>() }
+    func cheat() { game.cheat() }
+    
+    func newGame() { game = SetGame<Triple>(cardsToStart: ShapeSetGame.cardsToStart) }
 }
 
