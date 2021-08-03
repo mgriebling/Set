@@ -29,7 +29,7 @@ struct ShapeSetGameView: View {
                 Spacer()
                 Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
                 Spacer()
-                Button("Cheat") { game.cheat() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
+                Button("Cheat") { game.cheat() }.opacity(game.noMoreCheats ? mainSettings.ghostedOpacity : 1.0)
             }.padding(.horizontal)
         }
         .font(.title)

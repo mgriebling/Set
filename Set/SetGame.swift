@@ -32,6 +32,7 @@ struct SetGame<SetType:Chooseable> {
     private var numberOfStateVariables : Int { SetType.allCases.count+1 }  // this should always be true for all set game variants
     
     var noMoreCards : Bool { allCards.count == 0 }
+    var noMoreCheats : Bool = false
     private(set) var score = 0
     
     // Generic match that will work for any number of cards
@@ -123,7 +124,7 @@ struct SetGame<SetType:Chooseable> {
         }
     }
     
-    mutating func remove(_ card: Card, from cards: [Card]) -> [Card] {
+    private mutating func remove(_ card: Card, from cards: [Card]) -> [Card] {
         var newCards = cards
         if let index = cards.firstIndex(where: { $0.id == card.id }) {
             newCards.remove(at: index)
@@ -131,8 +132,7 @@ struct SetGame<SetType:Chooseable> {
         return newCards
     }
     
-    /// Cheat by providing a solution
-    mutating func cheat() {
+    fileprivate mutating func findASet() -> [Card] {
         let myCards = cards
         for card1 in myCards {
             let myCards2 = remove(card1, from: myCards)
@@ -140,20 +140,27 @@ struct SetGame<SetType:Chooseable> {
                 let myCards3 = remove(card1, from: myCards2)
                 for card3 in myCards3 {
                     if match([card1.states, card2.states, card3.states]) {
-                        deselectCards(selectedIndices)
-                        choose(card1)
-                        choose(card2)
-                        choose(card3)
-                        score -= 4
-                        return
+                        return [card1, card2, card3]
                     }
                 }
             }
         }
-        
-        // No match so deal some more cards
-        dealCards(number: 3)
-        cheat()
+        return []
+    }
+    
+    /// Cheat by providing a solution
+    mutating func cheat() {
+        let set = findASet()
+        if set.count == numberOfCardsToSelect {
+            deselectCards(selectedIndices)
+            set.forEach { choose($0) }
+            score -= 4
+        } else {
+            // No match so deal some more cards
+            dealCards(number: 3)
+            cheat()
+            noMoreCheats = matchedIndices.count == 0
+        }
     }
     
     mutating func dealCards(number: Int) {

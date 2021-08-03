@@ -37,6 +37,7 @@ class ShapeSetGame: ObservableObject {
     var cards : [SetGame<Triple>.Card] { game.cards }
     
     var noMoreCards : Bool { game.noMoreCards }
+    var noMoreCheats : Bool { game.noMoreCheats }
     var title : String { ShapeSetGame.theme.name + " Set" }
     var score : String { " Score: \(game.score)" }
     
