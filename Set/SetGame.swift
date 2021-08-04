@@ -7,20 +7,8 @@
 
 import Foundation
 
-protocol Chooseable : Equatable, CaseIterable { }
-
-extension Chooseable {
-    
-    // Advance to the next value, if at the last value, the first value is used
-    static public func inc(_ set: inout Self) {
-        let all = Array(Self.allCases)
-        if let index = all.firstIndex(of: set)  {
-            let next = all.index(after: index)
-            if next == all.endIndex { set = all.first! }
-            else { set = all[next] }
-        }
-    }
-    
+protocol Chooseable : Equatable, CaseIterable {
+    init(_ value: Int)
 }
 
 struct SetGame<SetType:Chooseable> {
@@ -33,7 +21,11 @@ struct SetGame<SetType:Chooseable> {
     
     var noMoreCards : Bool { allCards.count == 0 }
     var noMoreCheats : Bool = false
+    
     private(set) var score = 0
+    private(set) var bonus = 0
+    
+    public let timeToMatch = 10
     
     // Generic match that will work for any number of cards
     private func match(_ sets: [SetType]) -> Bool {
@@ -74,8 +66,12 @@ struct SetGame<SetType:Chooseable> {
                 cards[index].failedMatch = true
             }
         }
-        if matched { score += 3 }
-        else { score -= 1 }
+        if matched {
+            score += 3+bonus
+            resetBonus()
+        } else {
+            score -= 1+bonus
+        }
     }
     
     private mutating func replaceCards(_ indices: [Int]) {
@@ -101,23 +97,28 @@ struct SetGame<SetType:Chooseable> {
     private var matchedIndices : [Int]  { cards.indices.filter { cards[$0].isMatched } }
     private var failMatchIndices : [Int]  { cards.indices.filter { cards[$0].failedMatch } }
     
+    public var selectedCards : Int { selectedIndices.count }
+    
     mutating fileprivate func handleMatchedCards() {
-        if matchedIndices.count == numberOfCardsToSelect {
+        if selectedCards == numberOfCardsToSelect {
             replaceCards(matchedIndices)
         } else {
             deselectCards(selectedIndices)
         }
     }
     
+    public mutating func resetBonus() {  bonus = timeToMatch }
+    public mutating func decBonus()   { if bonus > 0 { bonus -= 1 } }
+    
     mutating func choose(_ card: Card) {
         if let chosenIndex = cards.firstIndex(where: { card.id == $0.id }) {
-            if selectedIndices.count < numberOfCardsToSelect {
+            if selectedCards < numberOfCardsToSelect {
                 cards[chosenIndex].isSelected.toggle()
             } else {
                 cards[chosenIndex].isSelected = true
             }
             matchCards(selectedIndices)
-            if selectedIndices.count > numberOfCardsToSelect {
+            if selectedCards > numberOfCardsToSelect {
                 handleMatchedCards()
                 cards[chosenIndex].isSelected = true
             }
@@ -154,7 +155,7 @@ struct SetGame<SetType:Chooseable> {
         if set.count == numberOfCardsToSelect {
             deselectCards(selectedIndices)
             set.forEach { choose($0) }
-            score -= 4
+            score -= 4+bonus
         } else {
             // No match so deal some more cards
             dealCards(number: 3)
@@ -166,8 +167,13 @@ struct SetGame<SetType:Chooseable> {
     mutating func dealCards(number: Int) {
         guard !noMoreCards else { return }
         
+        // penalize the user for picking more cards when a set was available
+        if findASet().count > 0 && matchedIndices.count == 0 {
+            score -= 1+bonus
+        }
+        
         // check if *numberOfCardsToSelect* cards have been matched
-        if selectedIndices.count == numberOfCardsToSelect {
+        if selectedCards == numberOfCardsToSelect {
             handleMatchedCards()
         } else {
             // move 'number' cards to the 'dealtCards' -- ok to ask for too many
@@ -178,17 +184,15 @@ struct SetGame<SetType:Chooseable> {
         }
     }
     
-    /// Uses recursion to increment all the states
-    private func inc(_ states: inout [SetType]) {
-        guard states.count > 0 else { return }
-        let lastValue = Array(SetType.allCases).last!
-        if states.first == lastValue {
-            // increment the next state variable
-            var newStates = Array(states.dropFirst())
-            inc(&newStates)
-            states = [states.first!] + newStates
+    /// Translates the *id* to a unique set of card *states*
+    private func state(_ id: Int) -> [SetType] {
+        var divisor = 1
+        var states = [SetType]()
+        for _ in 0..<numberOfStateVariables {
+            states.append(SetType((id / divisor) % numberOfCardsToSelect))
+            divisor *= numberOfCardsToSelect
         }
-        SetType.inc(&states[0])
+        return states
     }
     
     init(cardsToStart: Int) {
@@ -199,12 +203,10 @@ struct SetGame<SetType:Chooseable> {
         let totalCards = Int(pow(Double(numberOfCardsToSelect), Double(numberOfStateVariables)))
         
         // creates 3⁴ = 81 cards
-        var states = [SetType](repeating: SetType.allCases.first!, count: numberOfStateVariables)
         for id in 0..<totalCards {
-            allCards.append(Card(states: states, id: id))
-            inc(&states)
+            allCards.append(Card(states: state(id), id: id))
         }
-        
+
         // shuffle the deck
         allCards.shuffle()
         

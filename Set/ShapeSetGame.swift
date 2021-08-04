@@ -7,8 +7,14 @@
 
 import SwiftUI
 
-enum Triple : Chooseable {
-    case one, two, three
+enum Triple : Int, Chooseable {
+
+    case one=0, two, three
+    
+    init(_ value: Int) {
+        self.init(rawValue: value)!
+    }
+    
 }
 
 extension SetGame.Card {
@@ -39,7 +45,13 @@ class ShapeSetGame: ObservableObject {
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }
     var title : String { ShapeSetGame.theme.name + " Set" }
-    var score : String { " Score: \(game.score)" }
+    var score : String { "Score: \(game.score)" }
+    var bonus : String { "Bonus: \(game.bonus)" }
+    var timer : Timer?
+    
+    init() {
+        startTimer()
+    }
     
     private static let capsule = RoundedRectangle(cornerRadius: Tweaks.radius)
     
@@ -82,6 +94,15 @@ class ShapeSetGame: ObservableObject {
         static let aspect = CGFloat(2.0/1.0)
     }
     
+    private func startTimer() {
+        timer?.invalidate()
+        game.resetBonus()
+        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            if self.game.selectedCards < 3 {
+                self.game.decBonus()
+            }
+        }
+    }
     
     // MARK: - Intents
     
@@ -91,6 +112,9 @@ class ShapeSetGame: ObservableObject {
     
     func cheat() { game.cheat() }
     
-    func newGame() { game = SetGame<Triple>(cardsToStart: ShapeSetGame.cardsToStart) }
+    func newGame() {
+        game = SetGame<Triple>(cardsToStart: ShapeSetGame.cardsToStart)
+        startTimer()
+    }
 }
 

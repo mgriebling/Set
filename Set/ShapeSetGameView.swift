@@ -13,7 +13,7 @@ struct ShapeSetGameView: View {
     var body: some View {
         VStack {
             HStack {
-                Text(game.score).bold().opacity(0).padding(.horizontal)  // just center the title
+                Text(game.bonus).bold().padding(.horizontal)
                 Spacer()
                 Text(game.title)
                 Spacer()
