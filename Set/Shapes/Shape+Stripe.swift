@@ -39,7 +39,6 @@ extension Shape {
         guard
             let stripePattern = CGImage.generateStripePattern(colors: (.white, stripeColor))
         else { return AnyView(self)}
-
         return AnyView(Rectangle().fill(ImagePaint(
             image: Image(decorative: stripePattern, scale: 1.0)))
         .scaleEffect(2)

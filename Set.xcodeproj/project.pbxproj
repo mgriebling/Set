@@ -53,6 +53,30 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		47101E0726BC00F600E0FF8F /* Shapes */ = {
+			isa = PBXGroup;
+			children = (
+				47EA41B526B55CA3005A5DB8 /* Shape+Stripe.swift */,
+				47EA41B226B49AD4005A5DB8 /* Diamond.swift */,
+				47EA41B426B55CA3005A5DB8 /* Squiggle.swift */,
+			);
+			path = Shapes;
+			sourceTree = "<group>";
+		};
+		47101E0826BC011E00E0FF8F /* Miscellaneous */ = {
+			isa = PBXGroup;
+			children = (
+				47EA419F26B446ED005A5DB8 /* LaunchScreen.storyboard */,
+				47EA419426B446ED005A5DB8 /* AppDelegate.swift */,
+				47EA419626B446ED005A5DB8 /* SceneDelegate.swift */,
+				47EA41A826B4470F005A5DB8 /* AspectVGrid.swift */,
+				47EA419A26B446ED005A5DB8 /* Assets.xcassets */,
+				47EA41B026B4931D005A5DB8 /* Assignment 3.pdf */,
+				47EA41A226B446ED005A5DB8 /* Info.plist */,
+			);
+			path = Miscellaneous;
+			sourceTree = "<group>";
+		};
 		47EA418826B446ED005A5DB8 = {
 			isa = PBXGroup;
 			children = (
@@ -72,20 +96,12 @@
 		47EA419326B446ED005A5DB8 /* Set */ = {
 			isa = PBXGroup;
 			children = (
-				47EA41B526B55CA3005A5DB8 /* Shape+Stripe.swift */,
-				47EA41B426B55CA3005A5DB8 /* Squiggle.swift */,
-				47EA419426B446ED005A5DB8 /* AppDelegate.swift */,
-				47EA419626B446ED005A5DB8 /* SceneDelegate.swift */,
 				47EA419826B446ED005A5DB8 /* ShapeSetGameView.swift */,
 				47EA41AC26B47D11005A5DB8 /* SetGame.swift */,
 				47EA41B826B578AF005A5DB8 /* SetCardView.swift */,
-				47EA41B226B49AD4005A5DB8 /* Diamond.swift */,
 				47EA41AE26B47F7F005A5DB8 /* ShapeSetGame.swift */,
-				47EA41A826B4470F005A5DB8 /* AspectVGrid.swift */,
-				47EA419A26B446ED005A5DB8 /* Assets.xcassets */,
-				47EA419F26B446ED005A5DB8 /* LaunchScreen.storyboard */,
-				47EA41B026B4931D005A5DB8 /* Assignment 3.pdf */,
-				47EA41A226B446ED005A5DB8 /* Info.plist */,
+				47101E0726BC00F600E0FF8F /* Shapes */,
+				47101E0826BC011E00E0FF8F /* Miscellaneous */,
 				47EA419C26B446ED005A5DB8 /* Preview Content */,
 			);
 			path = Set;

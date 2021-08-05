@@ -51,6 +51,7 @@ class ShapeSetGame: ObservableObject {
     
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }
+    
     var title : String { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].name + " Set" }
     var score : String { "Score: \(game.score)" }
     var bonus : String { "Bonus: \(game.bonus)" }
