@@ -30,6 +30,8 @@ struct ShapeSetGameView: View {
                 Button("Deal 3 Cards") { game.deal3() }.opacity(game.noMoreCards ? mainSettings.ghostedOpacity : 1.0)
                 Spacer()
                 Button("Cheat") { game.cheat() }.opacity(game.noMoreCheats ? mainSettings.ghostedOpacity : 1.0)
+                Spacer()
+                Toggle("Colour", isOn: $game.colourFlag).fixedSize().foregroundColor(.accentColor)
             }.padding(.horizontal)
         }
         .font(.title)

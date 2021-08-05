@@ -18,10 +18,10 @@ enum Triple : Int, Chooseable {
 }
 
 extension SetGame.Card {
-    var numberOfSymbols : Int                 { ShapeSetGame.theme.number[self.states[0] as! Triple]! }
-    var colourOfSymbols : Color               { ShapeSetGame.theme.colours[self.states[1]  as! Triple]! }
-    var shapeOfSymbols  : ShapeSetGame.Shapes { ShapeSetGame.theme.shapes[self.states[2]  as! Triple]! }
-    var fillOfSymbols   : ShapeSetGame.Fills  { ShapeSetGame.theme.fills[self.states[3]  as! Triple]! }
+    var numberOfSymbols : Int                 { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].number[self.states[0] as! Triple]! }
+    var colourOfSymbols : Color               { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].colours[self.states[1]  as! Triple]! }
+    var shapeOfSymbols  : ShapeSetGame.Shapes { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].shapes[self.states[2]  as! Triple]! }
+    var fillOfSymbols   : ShapeSetGame.Fills  { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].fills[self.states[3]  as! Triple]! }
 }
 
 class ShapeSetGame: ObservableObject {
@@ -29,12 +29,19 @@ class ShapeSetGame: ObservableObject {
     enum Fills { case none, solid, hatched }
     enum Shapes { case capsule, diamond, sqiggle }
     
-    static let theme =
+    static public var colourBlindFlag = 0
+    static let themes = [
         Theme(name: "Traditional",
               colours: [.one: .orange,  .two: .green,   .three: .purple],
               shapes:  [.one: .capsule, .two: .diamond, .three: .sqiggle],
               fills:   [.one: .none,    .two: .solid,   .three: .hatched],
+              number:  [.one: 1,        .two: 2,        .three: 3]),
+        Theme(name: "Colour Challenged",
+              colours: [.one: .black,  .two:  .blue,    .three:  Color(UIColor.lightGray)],
+              shapes:  [.one: .capsule, .two: .diamond, .three: .sqiggle],
+              fills:   [.one: .none,    .two: .solid,   .three: .hatched],
               number:  [.one: 1,        .two: 2,        .three: 3])
+    ]
     
     static let cardsToStart = 12
     
@@ -44,14 +51,20 @@ class ShapeSetGame: ObservableObject {
     
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }
-    var title : String { ShapeSetGame.theme.name + " Set" }
+    var title : String { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].name + " Set" }
     var score : String { "Score: \(game.score)" }
     var bonus : String { "Bonus: \(game.bonus)" }
     var timer : Timer?
     
-    init() {
-        startTimer()
+    var colourFlag : Bool {
+        set {
+            ShapeSetGame.colourBlindFlag = newValue ? 0 : 1
+            newGame()
+        }
+        get { ShapeSetGame.colourBlindFlag == 0 ? true : false }
     }
+    
+    init() { startTimer() }
     
     private static let capsule = RoundedRectangle(cornerRadius: Tweaks.radius)
     
