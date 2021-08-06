@@ -72,7 +72,6 @@
 				47EA41A826B4470F005A5DB8 /* AspectVGrid.swift */,
 				47EA419A26B446ED005A5DB8 /* Assets.xcassets */,
 				47EA41B026B4931D005A5DB8 /* Assignment 3.pdf */,
-				47EA41A226B446ED005A5DB8 /* Info.plist */,
 			);
 			path = Miscellaneous;
 			sourceTree = "<group>";
@@ -101,6 +100,7 @@
 				47EA41B826B578AF005A5DB8 /* SetCardView.swift */,
 				47EA41AE26B47F7F005A5DB8 /* ShapeSetGame.swift */,
 				47101E0726BC00F600E0FF8F /* Shapes */,
+				47EA41A226B446ED005A5DB8 /* Info.plist */,
 				47101E0826BC011E00E0FF8F /* Miscellaneous */,
 				47EA419C26B446ED005A5DB8 /* Preview Content */,
 			);

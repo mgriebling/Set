@@ -11,7 +11,7 @@ protocol Chooseable : Equatable, CaseIterable {
     init(_ value: Int)
 }
 
-struct SetGame<SetType:Chooseable> {
+struct SetGame<SetType:Chooseable, Content> {
     
     private(set) var cards: [Card]      // dealt cards
     private      var allCards: [Card]   // full deck
@@ -184,6 +184,11 @@ struct SetGame<SetType:Chooseable> {
         }
     }
     
+    mutating func updateTheme(content: ([SetType]) -> (Content)) {
+        cards.indices.forEach { cards[$0].content = content(cards[$0].states) }          // fix the dealt cards
+        allCards.indices.forEach { allCards[$0].content = content(allCards[$0].states) } // fix the undealt cards
+    }
+    
     /// Translates the *id* to a unique set of card *states*
     private func state(_ id: Int) -> [SetType] {
         var divisor = 1
@@ -195,7 +200,7 @@ struct SetGame<SetType:Chooseable> {
         return states
     }
     
-    init(cardsToStart: Int) {
+    init(cardsToStart: Int, content: ([SetType]) -> (Content)) {
         cards = []
         allCards = []
         
@@ -204,7 +209,8 @@ struct SetGame<SetType:Chooseable> {
         
         // creates 3⁴ = 81 cards
         for id in 0..<totalCards {
-            allCards.append(Card(states: state(id), id: id))
+            let states = state(id)
+            allCards.append(Card(states: states, content: content(states), id: id))
         }
 
         // shuffle the deck
@@ -218,8 +224,9 @@ struct SetGame<SetType:Chooseable> {
         var isSelected = false
         var isMatched = false
         var failedMatch = false
-        let states : [SetType]  // we store one SetType element for each card attribute
-        let id: Int             // Identifiable compliance
+        fileprivate let states : [SetType] // we store one SetType element for each card attribute
+        var content : Content
+        let id: Int                        // Identifiable compliance
     }
     
 }

@@ -8,27 +8,15 @@
 import SwiftUI
 
 enum Triple : Int, Chooseable {
-
     case one=0, two, three
-    
-    init(_ value: Int) {
-        self.init(rawValue: value)!
-    }
-    
+    init(_ value: Int) { self.init(rawValue: value)! }
 }
 
-extension SetGame.Card {
-    var numberOfSymbols : Int                 { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].number[self.states[0] as! Triple]! }
-    var colourOfSymbols : Color               { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].colours[self.states[1]  as! Triple]! }
-    var shapeOfSymbols  : ShapeSetGame.Shapes { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].shapes[self.states[2]  as! Triple]! }
-    var fillOfSymbols   : ShapeSetGame.Fills  { ShapeSetGame.themes[ShapeSetGame.colourBlindFlag].fills[self.states[3]  as! Triple]! }
-}
+enum Fills { case none, solid, hatched }
+enum Shapes { case capsule, diamond, sqiggle }
 
 class ShapeSetGame: ObservableObject {
 
-    enum Fills { case none, solid, hatched }
-    enum Shapes { case capsule, diamond, sqiggle }
-    
     static public var colourBlindFlag = 0
     static let themes = [
         Theme(name: "Traditional",
@@ -36,18 +24,28 @@ class ShapeSetGame: ObservableObject {
               shapes:  [.one: .capsule, .two: .diamond, .three: .sqiggle],
               fills:   [.one: .none,    .two: .solid,   .three: .hatched],
               number:  [.one: 1,        .two: 2,        .three: 3]),
-        Theme(name: "Colour Challenged",
+        Theme(name: "Black & Blue",
               colours: [.one: .black,  .two:  .blue,    .three:  Color(UIColor.lightGray)],
               shapes:  [.one: .capsule, .two: .diamond, .three: .sqiggle],
               fills:   [.one: .none,    .two: .solid,   .three: .hatched],
               number:  [.one: 1,        .two: 2,        .three: 3])
     ]
     
+    static func makeContent(_ state: [Triple]) -> Content {
+        Content(
+            colour: themes[colourBlindFlag].colours[state[0]]!,
+            number: themes[colourBlindFlag].number[state[1]]!,
+            fill:  themes[colourBlindFlag].fills[state[2]]!,
+            shape: themes[colourBlindFlag].shapes[state[3]]!
+        )
+    }
+    
     static let cardsToStart = 12
+    let cardsToMatch = Triple.allCases.count
     
-    @Published private var game = SetGame<Triple>(cardsToStart: cardsToStart)
+    @Published private var game = SetGame<Triple,Content>(cardsToStart: cardsToStart, content: makeContent)
     
-    var cards : [SetGame<Triple>.Card] { game.cards }
+    var cards : [SetGame<Triple,Content>.Card] { game.cards }
     
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }
@@ -60,16 +58,18 @@ class ShapeSetGame: ObservableObject {
     var colourFlag : Bool {
         set {
             ShapeSetGame.colourBlindFlag = newValue ? 0 : 1
-            newGame()
+            updateTheme()
         }
         get { ShapeSetGame.colourBlindFlag == 0 ? true : false }
     }
     
-    init() { startTimer() }
+    init() {
+        startTimer()
+    }
     
     private static let capsule = RoundedRectangle(cornerRadius: Tweaks.radius)
     
-    @ViewBuilder static func strokedSymbol(shape: Shapes, colour: Color) -> some View {
+    @ViewBuilder private static func strokedSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
         case .capsule: capsule.strokeBorder(colour, lineWidth: Tweaks.lineWidth).aspectRatio(Tweaks.aspect, contentMode: .fit)
         case .sqiggle: Squiggle().stroke(colour, lineWidth: Tweaks.lineWidth).aspectRatio(Tweaks.aspect, contentMode: .fit)
@@ -77,7 +77,7 @@ class ShapeSetGame: ObservableObject {
         }
     }
     
-    @ViewBuilder static func filledSymbol(shape: Shapes, colour: Color) -> some View {
+    @ViewBuilder private static func filledSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
         case .capsule: capsule.fill(colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
         case .sqiggle: Squiggle().fill(colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
@@ -85,11 +85,31 @@ class ShapeSetGame: ObservableObject {
         }
     }
     
-    @ViewBuilder static func hatchedSymbol(shape: Shapes, colour: Color) -> some View {
+    @ViewBuilder private static func hatchedSymbol(shape: Shapes, colour: Color) -> some View {
         switch shape {
         case .capsule: capsule.stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
         case .sqiggle: Squiggle().stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
         case .diamond: Diamond().stripes(colour: colour).aspectRatio(Tweaks.aspect, contentMode: .fit)
+        }
+    }
+    
+    @ViewBuilder static func draw(_ card : SetGame<Triple,Content>.Card, colour: Color) -> some View  {
+        let colourOfSymbols = card.content.colour
+        let shapeOfSymbols = card.content.shape
+        switch card.content.fill {
+        case .none:
+            ZStack {
+                // fill with white first so the hightlight shows better
+                filledSymbol(shape: shapeOfSymbols, colour: colour)
+                strokedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
+            }
+        case .solid:
+            filledSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
+        case .hatched:
+            ZStack {
+                hatchedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
+                strokedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
+            }
         }
     }
     
@@ -99,6 +119,13 @@ class ShapeSetGame: ObservableObject {
         let shapes:  [Triple:Shapes]
         let fills:   [Triple:Fills]
         let number:  [Triple:Int]
+    }
+    
+    struct Content {
+        let colour : Color
+        let number : Int
+        let fill   : Fills
+        let shape  : Shapes
     }
     
     // MARK: - Tweaking constants
@@ -111,8 +138,8 @@ class ShapeSetGame: ObservableObject {
     private func startTimer() {
         timer?.invalidate()
         game.resetBonus()
-        timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            if self.game.selectedCards < 3 {
+        timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { timer in
+            if self.game.selectedCards < self.cardsToMatch {
                 self.game.decBonus()
             }
         }
@@ -120,14 +147,16 @@ class ShapeSetGame: ObservableObject {
     
     // MARK: - Intents
     
-    func choose(_ card: SetGame<Triple>.Card) { game.choose(card) }
+    func choose(_ card: SetGame<Triple, Content>.Card) { game.choose(card) }
     
-    func deal3() { game.dealCards(number: 3) }
+    func deal3() { game.dealCards(number: cardsToMatch) }
     
     func cheat() { game.cheat() }
     
+    func updateTheme() { game.updateTheme(content: ShapeSetGame.makeContent) }
+    
     func newGame() {
-        game = SetGame<Triple>(cardsToStart: ShapeSetGame.cardsToStart)
+        game = SetGame<Triple,Content>(cardsToStart: ShapeSetGame.cardsToStart, content: ShapeSetGame.makeContent)
         startTimer()
     }
 }
