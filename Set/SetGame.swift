@@ -13,13 +13,14 @@ protocol Chooseable : Equatable, CaseIterable {
 
 struct SetGame<SetType:Chooseable, Content> {
     
-    private(set) var cards: [Card]      // dealt cards
-    private      var allCards: [Card]   // full deck
+    private(set) var cards: [Card]        // all cards
+    private(set) var dealtCards: [Card]   // cards in play
+    private(set) var discardDeck: [Card]  // discarded cards
     
     private var numberOfCardsToSelect : Int { SetType.allCases.count }     // this should always be true for all set game variants
     private var numberOfStateVariables : Int { SetType.allCases.count+1 }  // this should always be true for all set game variants
     
-    var noMoreCards : Bool { allCards.count == 0 }
+    var noMoreCards : Bool { cards.count == 0 }
     var noMoreCheats : Bool = false
     
     private(set) var score = 0
@@ -55,15 +56,15 @@ struct SetGame<SetType:Chooseable, Content> {
         }
     }
     
-    private mutating func matchCards(_ indices: [Int]) {
-        guard indices.count == numberOfCardsToSelect, matchedIndices.count == 0, failMatchIndices.count == 0 else { return }
-        let allStates = indices.map { cards[$0].states }
+    private mutating func matchCards(_ cards: [Card]) {
+        guard cards.count == numberOfCardsToSelect, matchedCards.count == 0, failMatchCards.count == 0 else { return }
+        let allStates = cards.map { $0.states }
         let matched = match(allStates)
-        for index in indices {
+        for card in cards {
             if matched {
-                cards[index].isMatched = true
+                dealtCards[card].isMatched = true
             } else {
-                cards[index].failedMatch = true
+                dealtCards[card].failedMatch = true
             }
         }
         if matched {
@@ -74,36 +75,40 @@ struct SetGame<SetType:Chooseable, Content> {
         }
     }
     
-    private mutating func replaceCards(_ indices: [Int]) {
+    private mutating func deleteCards(_ cards: [Card]) {
         // Use reversed indices to delete from the bottom up
-        for index in indices.reversed() {
-            if allCards.count > 0 {
-                cards[index] = allCards.removeFirst()
-            } else {
-                cards.remove(at: index)
-            }
+        for var card in cards {
+            dealtCards.remove(card)
+            deselectCard(&card)
+            discardDeck.insert(card, at: 0) // add to top of deleted cards
         }
     }
 
-    private mutating func deselectCards(_ indices: [Int]) {
-        for index in indices {
-            cards[index].isSelected = false
-            cards[index].failedMatch = false
-            cards[index].isMatched = false
+    private func deselectCard(_ card: inout Card) {
+        card.isSelected = false
+        card.failedMatch = false
+        card.isMatched = false
+    }
+    
+    private mutating func deselectCards(_ cards: [Card]) {
+        for card in cards {
+            deselectCard(&dealtCards[card])
         }
     }
     
-    private var selectedIndices : [Int] { cards.indices.filter { cards[$0].isSelected } }
-    private var matchedIndices : [Int]  { cards.indices.filter { cards[$0].isMatched } }
-    private var failMatchIndices : [Int]  { cards.indices.filter { cards[$0].failedMatch } }
+    var selectedCards           : [Card] { dealtCards.filter { $0.isSelected } }
+    private  var matchedCards   : [Card] { dealtCards.filter { $0.isMatched } }
+    private  var failMatchCards : [Card] { dealtCards.filter { $0.failedMatch } }
     
-    public var selectedCards : Int { selectedIndices.count }
-    
-    mutating fileprivate func handleMatchedCards() {
-        if selectedCards == numberOfCardsToSelect {
-            replaceCards(matchedIndices)
+    mutating fileprivate func handleMatchedCards() -> Bool {
+        if matchedCards.count == numberOfCardsToSelect {
+            let matched = matchedCards
+            deselectCards(selectedCards)
+            deleteCards(matched)
+            return true
         } else {
-            deselectCards(selectedIndices)
+            deselectCards(selectedCards)
+            return false
         }
     }
     
@@ -111,30 +116,28 @@ struct SetGame<SetType:Chooseable, Content> {
     public mutating func decBonus()   { if bonus > 0 { bonus -= 1 } }
     
     mutating func choose(_ card: Card) {
-        if let chosenIndex = cards.firstIndex(where: { card.id == $0.id }) {
-            if selectedCards < numberOfCardsToSelect {
-                cards[chosenIndex].isSelected.toggle()
-            } else {
-                cards[chosenIndex].isSelected = true
+        if selectedCards.count < numberOfCardsToSelect {
+            dealtCards[card].isSelected.toggle()
+        } else {
+            dealtCards[card].isSelected = true
+        }
+        matchCards(selectedCards)
+        if selectedCards.count > numberOfCardsToSelect {
+            if handleMatchedCards() {
+                dealCards(number: numberOfCardsToSelect)
             }
-            matchCards(selectedIndices)
-            if selectedCards > numberOfCardsToSelect {
-                handleMatchedCards()
-                cards[chosenIndex].isSelected = true
-            }
+            dealtCards[card].isSelected = true
         }
     }
     
     private mutating func remove(_ card: Card, from cards: [Card]) -> [Card] {
         var newCards = cards
-        if let index = cards.firstIndex(where: { $0.id == card.id }) {
-            newCards.remove(at: index)
-        }
+        newCards.remove(card)
         return newCards
     }
     
     fileprivate mutating func findASet() -> [Card] {
-        let myCards = cards
+        let myCards = dealtCards
         for card1 in myCards {
             let myCards2 = remove(card1, from: myCards)
             for card2 in myCards2 {
@@ -153,40 +156,43 @@ struct SetGame<SetType:Chooseable, Content> {
     mutating func cheat() {
         let set = findASet()
         if set.count == numberOfCardsToSelect {
-            deselectCards(selectedIndices)
+            deselectCards(selectedCards)
             set.forEach { choose($0) }
             score -= 4+bonus
         } else {
             // No match so deal some more cards
             dealCards(number: 3)
             cheat()
-            noMoreCheats = matchedIndices.count == 0
+            noMoreCheats = matchedCards.count == 0
         }
     }
     
-    mutating func dealCards(number: Int) {
+    mutating func dealCards(number: Int, start: Bool = false) {
         guard !noMoreCards else { return }
         
         // penalize the user for picking more cards when a set was available
-        if findASet().count > 0 && matchedIndices.count == 0 {
+        if !start && findASet().count > 0 && matchedCards.count == 0 {
             score -= 1+bonus
         }
         
         // check if *numberOfCardsToSelect* cards have been matched
-        if selectedCards == numberOfCardsToSelect {
-            handleMatchedCards()
-        } else {
-            // move 'number' cards to the 'dealtCards' -- ok to ask for too many
-            cards.append(contentsOf: allCards.prefix(number))
-            
-            // remove 'number' cards from the deck -- check the number or 'removeFirst' will complain
-            allCards.removeFirst(min(number, allCards.count))
+        if selectedCards.count == numberOfCardsToSelect {
+            _ = handleMatchedCards()
         }
+        
+        // move 'number' cards to the 'dealtCards' -- ok to ask for too many
+        var newCards = cards.prefix(number)
+        newCards.forEach { newCards[$0].isFaceUp = true }
+        dealtCards.append(contentsOf: newCards)
+        
+        // remove 'number' cards from the deck -- check the number or 'removeFirst' will complain
+        cards.removeFirst(min(number, cards.count))
     }
     
     mutating func updateTheme(content: ([SetType]) -> (Content)) {
-        cards.indices.forEach { cards[$0].content = content(cards[$0].states) }          // fix the dealt cards
-        allCards.indices.forEach { allCards[$0].content = content(allCards[$0].states) } // fix the undealt cards
+        dealtCards.forEach { dealtCards[$0].content = content($0.states) }    // fix the dealt cards
+        cards.forEach { cards[$0].content = content($0.states) }              // fix the undealt cards
+        discardDeck.forEach { discardDeck[$0].content = content($0.states) }  // fix the discards
     }
     
     /// Translates the *id* to a unique set of card *states*
@@ -200,9 +206,10 @@ struct SetGame<SetType:Chooseable, Content> {
         return states
     }
     
-    init(cardsToStart: Int, content: ([SetType]) -> (Content)) {
+    init(content: ([SetType]) -> (Content)) {
         cards = []
-        allCards = []
+        dealtCards = []
+        discardDeck = []
         
         // Total number of cards
         let totalCards = Int(pow(Double(numberOfCardsToSelect), Double(numberOfStateVariables)))
@@ -210,20 +217,18 @@ struct SetGame<SetType:Chooseable, Content> {
         // creates 3⁴ = 81 cards
         for id in 0..<totalCards {
             let states = state(id)
-            allCards.append(Card(states: states, content: content(states), id: id))
+            cards.append(Card(states: states, content: content(states), id: id))
         }
 
         // shuffle the deck
-        allCards.shuffle()
-        
-        // deal 'cardsToStart' cards to begin
-        dealCards(number: cardsToStart)
+        cards.shuffle()
     }
     
     struct Card : Identifiable {
         var isSelected = false
         var isMatched = false
         var failedMatch = false
+        var isFaceUp = false
         fileprivate let states : [SetType] // we store one SetType element for each card attribute
         var content : Content
         let id: Int                        // Identifiable compliance

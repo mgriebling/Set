@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		47101E0A26BD4BFB00E0FF8F /* Assignment 4.pdf in Resources */ = {isa = PBXBuildFile; fileRef = 47101E0926BD4BFB00E0FF8F /* Assignment 4.pdf */; };
+		47101E0C26BD54AE00E0FF8F /* Cardify.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47101E0B26BD54AE00E0FF8F /* Cardify.swift */; };
 		47EA419526B446ED005A5DB8 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA419426B446ED005A5DB8 /* AppDelegate.swift */; };
 		47EA419726B446ED005A5DB8 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA419626B446ED005A5DB8 /* SceneDelegate.swift */; };
 		47EA419926B446ED005A5DB8 /* ShapeSetGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA419826B446ED005A5DB8 /* ShapeSetGameView.swift */; };
@@ -21,9 +23,12 @@
 		47EA41B626B55CA3005A5DB8 /* Squiggle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA41B426B55CA3005A5DB8 /* Squiggle.swift */; };
 		47EA41B726B55CA3005A5DB8 /* Shape+Stripe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA41B526B55CA3005A5DB8 /* Shape+Stripe.swift */; };
 		47EA41B926B578AF005A5DB8 /* SetCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47EA41B826B578AF005A5DB8 /* SetCardView.swift */; };
+		47FABD3C26C06F4800B8DBDC /* UtilityExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47FABD3B26C06F4800B8DBDC /* UtilityExtensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		47101E0926BD4BFB00E0FF8F /* Assignment 4.pdf */ = {isa = PBXFileReference; lastKnownFileType = image.pdf; path = "Assignment 4.pdf"; sourceTree = "<group>"; };
+		47101E0B26BD54AE00E0FF8F /* Cardify.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Cardify.swift; sourceTree = "<group>"; };
 		47EA419126B446ED005A5DB8 /* Set.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Set.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		47EA419426B446ED005A5DB8 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		47EA419626B446ED005A5DB8 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -40,6 +45,7 @@
 		47EA41B426B55CA3005A5DB8 /* Squiggle.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Squiggle.swift; sourceTree = "<group>"; };
 		47EA41B526B55CA3005A5DB8 /* Shape+Stripe.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Shape+Stripe.swift"; sourceTree = "<group>"; };
 		47EA41B826B578AF005A5DB8 /* SetCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SetCardView.swift; sourceTree = "<group>"; };
+		47FABD3B26C06F4800B8DBDC /* UtilityExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UtilityExtensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,12 +72,14 @@
 		47101E0826BC011E00E0FF8F /* Miscellaneous */ = {
 			isa = PBXGroup;
 			children = (
+				47FABD3B26C06F4800B8DBDC /* UtilityExtensions.swift */,
 				47EA419F26B446ED005A5DB8 /* LaunchScreen.storyboard */,
 				47EA419426B446ED005A5DB8 /* AppDelegate.swift */,
 				47EA419626B446ED005A5DB8 /* SceneDelegate.swift */,
 				47EA41A826B4470F005A5DB8 /* AspectVGrid.swift */,
 				47EA419A26B446ED005A5DB8 /* Assets.xcassets */,
 				47EA41B026B4931D005A5DB8 /* Assignment 3.pdf */,
+				47101E0926BD4BFB00E0FF8F /* Assignment 4.pdf */,
 			);
 			path = Miscellaneous;
 			sourceTree = "<group>";
@@ -99,6 +107,7 @@
 				47EA41AC26B47D11005A5DB8 /* SetGame.swift */,
 				47EA41B826B578AF005A5DB8 /* SetCardView.swift */,
 				47EA41AE26B47F7F005A5DB8 /* ShapeSetGame.swift */,
+				47101E0B26BD54AE00E0FF8F /* Cardify.swift */,
 				47101E0726BC00F600E0FF8F /* Shapes */,
 				47EA41A226B446ED005A5DB8 /* Info.plist */,
 				47101E0826BC011E00E0FF8F /* Miscellaneous */,
@@ -174,6 +183,7 @@
 			files = (
 				47EA41B126B4931D005A5DB8 /* Assignment 3.pdf in Resources */,
 				47EA41A126B446ED005A5DB8 /* LaunchScreen.storyboard in Resources */,
+				47101E0A26BD4BFB00E0FF8F /* Assignment 4.pdf in Resources */,
 				47EA419E26B446ED005A5DB8 /* Preview Assets.xcassets in Resources */,
 				47EA419B26B446ED005A5DB8 /* Assets.xcassets in Resources */,
 			);
@@ -186,7 +196,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				47101E0C26BD54AE00E0FF8F /* Cardify.swift in Sources */,
 				47EA41B726B55CA3005A5DB8 /* Shape+Stripe.swift in Sources */,
+				47FABD3C26C06F4800B8DBDC /* UtilityExtensions.swift in Sources */,
 				47EA41B926B578AF005A5DB8 /* SetCardView.swift in Sources */,
 				47EA41AF26B47F7F005A5DB8 /* ShapeSetGame.swift in Sources */,
 				47EA41A926B4470F005A5DB8 /* AspectVGrid.swift in Sources */,

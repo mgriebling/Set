@@ -8,35 +8,47 @@
 import SwiftUI
 
 struct SetCardView: View {
-    var card: SetGame<Triple,ShapeSetGame.Content>.Card
-    var backColor: Color
+    var card: ShapeSetGame.Card
     
     var body: some View {
-        VStack {
-            let cardShape = RoundedRectangle(cornerRadius: DrawingConstants.cornerRadius)
-            ZStack {
-                cardShape.fill().foregroundColor(DrawingConstants.cardColour)
-                cardShape.strokeBorder(lineWidth: card.isSelected ? 2*DrawingConstants.lineWidth : DrawingConstants.lineWidth)
-                VStack {
-                    ForEach([Int](1...card.content.number), id: \.self) { _ in
-                        ShapeSetGame.draw(card, colour: DrawingConstants.cardColour)
+        GeometryReader { geometry in
+            let backColour = card.isSelected ? DrawingConstants.highlightColour : DrawingConstants.outlineColour
+            VStack {
+                ZStack {
+                    VStack {
+                        ForEach([Int](1...card.content.number), id: \.self) { _ in
+                            ShapeSetGame.draw(card, colour: DrawingConstants.cardColour)
+                        }
                     }
-                }.padding()
-                Image(systemName: card.isMatched ? "checkmark" : "xmark")
-                    .font(.system(size: DrawingConstants.xmarkSize))
-                    .foregroundColor(card.isMatched ? .green : .red)
-                    .opacity((card.failedMatch || card.isMatched) ? 1 : 0)
-                    .shadow(radius: 10)
-            }
-        }.foregroundColor(backColor)
+                    .padding()
+                    Image(systemName: card.isMatched ? "checkmark" : "xmark")
+                        .opacity(card.isMatched || card.failedMatch ? 1 : 0)
+                        .animation(.easeInOut.repeatCount(DrawingConstants.repeating, autoreverses: true))
+                        .font(Font.system(size: DrawingConstants.fontSize))
+                        .scaleEffect(scale(thatFits: geometry.size))
+                        .foregroundColor(card.isMatched ? .green : .red)
+                        .shadow(radius: DrawingConstants.shadowRadius)
+                }
+            }.cardify(isFaceUp: card.isFaceUp)
+            .foregroundColor(backColour)
+        }
+    }
+    
+    // the "scale factor" to scale our Text up so that it fits the geometry.size offered to us
+    private func scale(thatFits size: CGSize) -> CGFloat {
+        min(size.width, size.height) / (DrawingConstants.fontSize / DrawingConstants.fontScale)
     }
     
     private struct DrawingConstants {
+        static let repeating = 100
+        static let highlightColour = Color.blue
+        static let outlineColour = Color.gray.opacity(0.6)
         static let cardColour = Color.white
-        static let cornerRadius = CGFloat(10)
         static let lineWidth = CGFloat(3)
         static let opacity = 0.8
-        static let xmarkSize = CGFloat(150)
+        static let fontScale: CGFloat = 0.7
+        static let fontSize: CGFloat = 40
+        static let shadowRadius = CGFloat(10)
     }
 }
 

@@ -40,12 +40,16 @@ class ShapeSetGame: ObservableObject {
         )
     }
     
-    static let cardsToStart = 12
+    let cardsToStart = 12
     let cardsToMatch = Triple.allCases.count
     
-    @Published private var game = SetGame<Triple,Content>(cardsToStart: cardsToStart, content: makeContent)
+    @Published private var game = SetGame<Triple,Content>(content: makeContent)
     
-    var cards : [SetGame<Triple,Content>.Card] { game.cards }
+    typealias Card = SetGame<Triple,Content>.Card
+    
+    var cards : [Card]      { game.cards }
+    var dealtCards : [Card] { game.dealtCards }
+    var discarded : [Card]  { game.discardDeck }
     
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }
@@ -93,7 +97,7 @@ class ShapeSetGame: ObservableObject {
         }
     }
     
-    @ViewBuilder static func draw(_ card : SetGame<Triple,Content>.Card, colour: Color) -> some View  {
+    @ViewBuilder static func draw(_ card : Card, colour: Color) -> some View  {
         let colourOfSymbols = card.content.colour
         let shapeOfSymbols = card.content.shape
         switch card.content.fill {
@@ -102,14 +106,14 @@ class ShapeSetGame: ObservableObject {
                 // fill with white first so the hightlight shows better
                 filledSymbol(shape: shapeOfSymbols, colour: colour)
                 strokedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
-            }
+            }.animation(.none)
         case .solid:
-            filledSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
+            filledSymbol(shape: shapeOfSymbols, colour: colourOfSymbols).animation(.none)
         case .hatched:
             ZStack {
                 hatchedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
                 strokedSymbol(shape: shapeOfSymbols, colour: colourOfSymbols)
-            }
+            }.animation(.none)
         }
     }
     
@@ -139,7 +143,7 @@ class ShapeSetGame: ObservableObject {
         timer?.invalidate()
         game.resetBonus()
         timer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { timer in
-            if self.game.selectedCards < self.cardsToMatch {
+            if self.game.selectedCards.count < self.cardsToMatch {
                 self.game.decBonus()
             }
         }
@@ -147,16 +151,16 @@ class ShapeSetGame: ObservableObject {
     
     // MARK: - Intents
     
-    func choose(_ card: SetGame<Triple, Content>.Card) { game.choose(card) }
+    func choose(_ card: Card) { game.choose(card) }
     
-    func deal3() { game.dealCards(number: cardsToMatch) }
+    func dealCard(starting: Bool) { game.dealCards(number: 1, start: starting) }
     
     func cheat() { game.cheat() }
     
     func updateTheme() { game.updateTheme(content: ShapeSetGame.makeContent) }
     
     func newGame() {
-        game = SetGame<Triple,Content>(cardsToStart: ShapeSetGame.cardsToStart, content: ShapeSetGame.makeContent)
+        game = SetGame<Triple,Content>(content: ShapeSetGame.makeContent)
         startTimer()
     }
 }
