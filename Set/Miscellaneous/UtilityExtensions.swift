@@ -8,6 +8,26 @@
 
 import SwiftUI
 
+//
+// Useful in causing an animation to stop
+extension Animation {
+    func `repeat` (while expression: Bool, autoreverses: Bool = true) -> Animation {
+        if expression {
+            return self.repeatForever(autoreverses: autoreverses)
+        } else {
+            return self
+        }
+    }
+}
+
+//
+// Useful in doing a flipping card transition
+extension AnyTransition {
+    static var flipFaceUp: AnyTransition {
+        AnyTransition.modifier(active: Cardify(isFaceUp: false), identity: Cardify(isFaceUp: true))
+    }
+}
+
 // in a Collection of Identifiables
 // we often might want to find the element that has the same id
 // as an Identifiable we already have in hand

@@ -68,10 +68,10 @@ struct SetGame<SetType:Chooseable, Content> {
             }
         }
         if matched {
-            score += 3+bonus
+            score += 3
             resetBonus()
         } else {
-            score -= 1+bonus
+            score -= 1
         }
     }
     
@@ -96,9 +96,9 @@ struct SetGame<SetType:Chooseable, Content> {
         }
     }
     
-    var selectedCards           : [Card] { dealtCards.filter { $0.isSelected } }
-    private  var matchedCards   : [Card] { dealtCards.filter { $0.isMatched } }
-    private  var failMatchCards : [Card] { dealtCards.filter { $0.failedMatch } }
+    var selectedCards  : [Card] { dealtCards.filter { $0.isSelected } }
+    var matchedCards   : [Card] { dealtCards.filter { $0.isMatched } }
+    var failMatchCards : [Card] { dealtCards.filter { $0.failedMatch } }
     
     mutating fileprivate func handleMatchedCards() -> Bool {
         if matchedCards.count == numberOfCardsToSelect {
@@ -158,7 +158,7 @@ struct SetGame<SetType:Chooseable, Content> {
         if set.count == numberOfCardsToSelect {
             deselectCards(selectedCards)
             set.forEach { choose($0) }
-            score -= 4+bonus
+            score -= 4
         } else {
             // No match so deal some more cards
             dealCards(number: 3)
@@ -172,7 +172,7 @@ struct SetGame<SetType:Chooseable, Content> {
         
         // penalize the user for picking more cards when a set was available
         if !start && findASet().count > 0 && matchedCards.count == 0 {
-            score -= 1+bonus
+            score -= 1
         }
         
         // check if *numberOfCardsToSelect* cards have been matched
@@ -195,7 +195,7 @@ struct SetGame<SetType:Chooseable, Content> {
         discardDeck.forEach { discardDeck[$0].content = content($0.states) }  // fix the discards
     }
     
-    /// Translates the *id* to a unique set of card *states*
+    /// Returns a unique set of card states for the *id*.
     private func state(_ id: Int) -> [SetType] {
         var divisor = 1
         var states = [SetType]()

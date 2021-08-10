@@ -47,9 +47,10 @@ class ShapeSetGame: ObservableObject {
     
     typealias Card = SetGame<Triple,Content>.Card
     
-    var cards : [Card]      { game.cards }
-    var dealtCards : [Card] { game.dealtCards }
-    var discarded : [Card]  { game.discardDeck }
+    var cards : [Card]        { game.cards }
+    var dealtCards : [Card]   { game.dealtCards }
+    var discarded : [Card]    { game.discardDeck }
+    var matchedCards : [Card] { game.matchedCards }
     
     var noMoreCards : Bool { game.noMoreCards }
     var noMoreCheats : Bool { game.noMoreCheats }

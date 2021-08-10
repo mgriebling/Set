@@ -21,15 +21,17 @@ struct SetCardView: View {
                         }
                     }
                     .padding()
+                    let active = card.isMatched || card.failedMatch
                     Image(systemName: card.isMatched ? "checkmark" : "xmark")
-                        .opacity(card.isMatched || card.failedMatch ? 1 : 0)
-                        .animation(.easeInOut.repeatCount(DrawingConstants.repeating, autoreverses: true))
+                        .opacity(active ? 1 : 0)
+                        .animation(.easeInOut(duration: 1).repeat(while: active, autoreverses: true))
                         .font(Font.system(size: DrawingConstants.fontSize))
                         .scaleEffect(scale(thatFits: geometry.size))
                         .foregroundColor(card.isMatched ? .green : .red)
                         .shadow(radius: DrawingConstants.shadowRadius)
                 }
-            }.cardify(isFaceUp: card.isFaceUp)
+            }
+            .cardify(isFaceUp: card.isFaceUp)
             .foregroundColor(backColour)
         }
     }

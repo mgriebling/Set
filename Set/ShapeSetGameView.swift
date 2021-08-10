@@ -17,9 +17,10 @@ struct ShapeSetGameView: View {
         -Double(deck.index(matching: card) ?? 0)
     }
     
-    private func dealAnimation(for index: Int, totalCards: Int) -> Animation {
-        let delay = Double(index) * (mainSettings.totalDealDuration / Double(totalCards))
-        return Animation.easeInOut(duration: mainSettings.dealDuration).delay(delay)
+    private func dealAnimation(for index: Int, totalCards: Int, matched: Bool) -> Animation {
+        let delay = Double(index+1) * (mainSettings.totalDealDuration / Double(totalCards+1))
+        let extra = matched ? 1.0 : 0.0
+        return Animation.easeInOut(duration: mainSettings.dealDuration).delay(delay+extra)
     }
     
     var body: some View {
@@ -57,6 +58,7 @@ struct ShapeSetGameView: View {
             withAnimation {
                 game.newGame()
             }
+            dealCards(game.cardsToStart, starting: true)
         }
     }
     
@@ -78,8 +80,8 @@ struct ShapeSetGameView: View {
         AspectVGrid(items: game.dealtCards, aspectRatio: mainSettings.aspectRatio) { card in
             SetCardView(card: card)
                 .matchedGeometryEffect(id: card.id, in: dealingNamespace)
+//                .transition(AnyTransition.asymmetric(insertion: .flipFaceUp, removal: .identity))
                 .padding(mainSettings.padding)
- //               .transition(AnyTransition.asymmetric(insertion: .identity, removal: .scale))
                 .zIndex(zIndex(of: card, in: game.dealtCards))
                 .onTapGesture {
                     withAnimation {
@@ -95,7 +97,7 @@ struct ShapeSetGameView: View {
             ForEach(game.cards) { card in
                 SetCardView(card: card)
                     .matchedGeometryEffect(id: card.id, in: dealingNamespace)
-//                    .transition(AnyTransition.asymmetric(insertion: .opacity, removal: .identity))
+                    .transition(AnyTransition.asymmetric(insertion: .identity, removal: .flipFaceUp))
                     .zIndex(zIndex(of: card, in: game.cards))
             }
         }
@@ -107,8 +109,9 @@ struct ShapeSetGameView: View {
     }
     
     func dealCards(_ number: Int, starting: Bool) {
+        let matched = game.matchedCards.count > 0
         for index in 0..<number {
-            withAnimation(dealAnimation(for: index, totalCards: number)) {
+            withAnimation(dealAnimation(for: index, totalCards: number, matched: matched)) {
                 game.dealCard(starting: starting)
             }
         }
@@ -133,7 +136,7 @@ struct ShapeSetGameView: View {
         static let colour = Color.blue
         static let ghostedOpacity = 0.3
         static let aspectRatio = CGFloat(2.0/3.0)
-        static let totalDealDuration = Double(3)
+        static let totalDealDuration = Double(10)
         static let dealDuration = Double(1)
         static let undealtHeight = CGFloat(90)
         static let undealtWidth = undealtHeight * aspectRatio
